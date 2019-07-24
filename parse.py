@@ -29,7 +29,7 @@ class BSTNode():
         res = ""
         # Print ourselves
         res += self.value
-        if self.value[-1] != "\n":
+        if len(self.value) == 0 or self.value[-1] != "\n":
             res += "\n"
 
         if self.left != None:

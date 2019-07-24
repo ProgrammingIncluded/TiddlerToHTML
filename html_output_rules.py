@@ -27,6 +27,13 @@ def html_output_rules_pre(node):
         
     elif node.type[0] == "H":
         return "<h" + str(node.type[1]) + ">\n"
+    elif node.type[0] == "I":
+        return "<i>"
+    elif node.type[0] == "U":
+        return "<u>"
+    elif node.type[0] == "B":
+        return "<b>"
+
 
     if node.type == "ROOT":
         return ""
@@ -43,6 +50,15 @@ def html_output_rules_post(node):
     
     elif node.type[0] == "H":
         return "</h" + str(node.type[1]) + ">\n"
+
+    elif node.type[0] == "I":
+        return "</i>"
+
+    elif node.type[0] == "U":
+        return "</u>\n"
+
+    elif node.type[0] == "B":
+        return "</b>\n"
 
     if node.type == "ROOT":
         return ""
