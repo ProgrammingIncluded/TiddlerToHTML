@@ -33,6 +33,8 @@ def html_output_rules_pre(node):
         return "<u>"
     elif node.type[0] == "B":
         return "<b>"
+    elif node.type[0] == "Q":
+        return '<div class="quote">\n'
 
 
     if node.type == "ROOT":
@@ -59,6 +61,9 @@ def html_output_rules_post(node):
 
     elif node.type[0] == "B":
         return "</b>"
+
+    elif node.type[0] == "Q":
+        return '</div class="quote">\n'
 
     if node.type == "ROOT":
         return ""

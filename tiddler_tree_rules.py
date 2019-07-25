@@ -1,7 +1,10 @@
 import re
 from parse import *
 
+# Global variables to keep track
 TOKENS = {"//" : "I", "__" : "U", "''": "B"}
+INQUOTE = False
+
 
 # Append more data to the RAW node
 def append_raw(node, data):
@@ -11,7 +14,7 @@ def append_raw(node, data):
 
 # Exit current scope in tree
 # Returns first node outside scope
-def exit_scope(node):
+def exit_scope(node, scope = None):
     # Default case
     if node.parent == None:
         return node
@@ -21,8 +24,14 @@ def exit_scope(node):
     while not done:
         p = cur.parent
 
-        if p.type != "RAW" and p.right.ID == cur.ID:
-            done = True
+        # Only valid if we have a right child
+        if p.right != None:
+            if scope == None:
+                if p.type != "RAW" and p.right.ID == cur.ID:
+                    done = True
+            else:
+                if p.type == scope and p.right.ID == cur.ID:
+                    done = True
 
         if p.type == "ROOT":
             done = True
@@ -97,20 +106,33 @@ def parse_raw(raw, line):
 # Returns left most node
 def tiddler_tree_rules(parent, line):
     
+    global INQUOTE
     values = line.split(' ', 1)
 
-    # Count number of header values
+    # Count number of header values for headers
     if len(values) >= 2:
         token = values[0]
         line_mod = values[1]
 
+        # Parse headers
         if token[0] == "!":
             # Count number of exclamations
             num = count_front_symbol(token, "!")
             # Add type to the left
             parent.left =  BSTNode(parent, "H" + str(num), "H" + str(num), None, None)
-            parent.left.right = BSTNode(parent, "RAW", line_mod, None, None)
+            parent.left.right = BSTNode(parent.left, "RAW", line_mod, None, None)
             return parent.left
+
+    # Parse quotes
+    if line[0:3] == "<<<":
+        if not INQUOTE:
+            parent.left = BSTNode(parent, "Q", "Q", None, None)
+            parent.left.right = BSTNode(parent.left, "RAW", "", None, None)
+            INQUOTE = True
+            return parent.left.right
+        else:
+            INQUOTE = False
+            return exit_scope(parent, "Q")
     
     # Create a raw and pass it in if it isn't already
     if parent.type != "RAW":

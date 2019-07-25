@@ -64,7 +64,6 @@ def main():
 
         # Create parse tree from file
         inroot = tid_tree(f)
-        print(inroot)
 
         # Once we have the tree, read the tree
         # and convert to html
