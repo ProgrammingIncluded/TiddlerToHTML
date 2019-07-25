@@ -3,7 +3,7 @@ import os
 
 from tiddler_tree_rules import * 
 from html_output_rules import *
-from parse import BSTNode
+from BSTNode import BSTNode
 
 # Function to output help string.
 def help_str():

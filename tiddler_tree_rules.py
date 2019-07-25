@@ -1,9 +1,11 @@
 import re
-from parse import *
+from BSTNode import *
 
 # Global variables to keep track
 TOKENS = {"//" : "I", "__" : "U", "''": "B"}
 INQUOTE = False
+INNUMLIST = False
+INBULLIST = False
 
 
 # Append more data to the RAW node
