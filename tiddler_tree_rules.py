@@ -1,11 +1,37 @@
 import re
 from parse import *
 
+TOKENS = {"//" : "I", "__" : "U", "''": "B"}
+
 # Append more data to the RAW node
 def append_raw(node, data):
     if node.type == "RAW":
         node.value += data
     return node
+
+# Exit current scope in tree
+# Returns first node outside scope
+def exit_scope(node):
+    # Default case
+    if node.parent == None:
+        return node
+
+    cur = node
+    done = False
+    while not done:
+        p = cur.parent
+
+        if p.type != "RAW" and p.right.ID == cur.ID:
+            done = True
+
+        if p.type == "ROOT":
+            done = True
+
+        cur = p
+        
+    
+    return cur
+
 
 # Parse text and format it.
 # Assuming text modifiers are in the same line.
@@ -14,37 +40,61 @@ def parse_raw(raw, line):
     values = line.split(" ")
     node = raw
 
+    bits = {v:False for v in TOKENS.values()}
+
     for v in values:
-        # restore our values with spaces
-        vst = v.strip()
         res = v
-        ind = 0
         if res[-1] != "\n":
             res += " "
 
-        if vst[0:2] == "//":
-            node.left = BSTNode(node, "I", "I", None, None)
-            node = node.left
-            # creating a new raw node
-            node.right = BSTNode(node, "RAW", "", None, None)
-            ind = 2
-            node = node.right
+        for k, l in TOKENS.items():
+            # restore our values with spaces
+              # Do a find
+            sfind = res.find(k)
+            if sfind != -1 and not bits[l]:
+                # remove the value
+                res = res[:sfind] + res[sfind + 2:]
+                node.left = BSTNode(node, l, l, None, None)
+                node = node.left
+                # creating a new raw node
+                # TODO: Optimize toe merge into one node
+                node.right = BSTNode(node, "RAW", "", None, None)
+                node = node.right
+
+                # toggle state
+                bits[l] = True
+
+        # See if we have another end token
+        endresults = {l: -2 for l in TOKENS.values()}
+        for k, l in TOKENS.items():
+            efind = res.find(k)
+            if efind != -1:
+                res = res[:efind] + res[efind+2:]
+            endresults[l] = efind
 
         # Append our raws 
-        node = append_raw(node, res[ind:])
+        node = append_raw(node, res)
 
-        # Check ending values
-        if vst[-2:] == "//":
-            # Need to append if not the same token
-            node.value = node.value[:-3]
-            node = node.parent
-            # Create a new RAW
-            node.left = BSTNode(node, "RAW", "", None, None)
-            node = node.left
+        for k, l in TOKENS.items():
+            # Check ending values
+            if endresults[l] != -1 and bits[l]:
+                # Move backup the nodes
+                node = exit_scope(node)
+                # Create a new RAW
+                # TODO: Optimize this node so only do it after all values.
+                node.left = BSTNode(node, "RAW", "", None, None)
+                node = node.left
 
-    return node
+                # Toggle back to false
+                bits[l] = False
+
+    # Go to left most node on top scope for our convenience
+    while raw.left != None:
+        raw = raw.left
+    return raw
 
 # Helper function in order to parse each line as a tree node value
+# Returns left most node
 def tiddler_tree_rules(parent, line):
     
     values = line.split(' ', 1)
@@ -62,7 +112,9 @@ def tiddler_tree_rules(parent, line):
             parent.left.right = BSTNode(parent, "RAW", line_mod, None, None)
             return parent.left
     
-    # Create a raw and pass it in
-    parent.left = BSTNode(parent, "RAW", "", None, None)
-    return parse_raw(parent.left, line)
+    # Create a raw and pass it in if it isn't already
+    if parent.type != "RAW":
+        parent.left = BSTNode(parent, "RAW", "", None, None)
+        parent = parent.left
+    return parse_raw(parent, line)
         

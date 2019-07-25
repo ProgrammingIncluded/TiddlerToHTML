@@ -8,6 +8,8 @@ def count_front_symbol(line, sym):
         count += 1
     return count
 
+UID = 0
+
 # Node for tree parsing.
 # Requires parents, type, value, and children.
 class BSTNode():
@@ -23,22 +25,26 @@ class BSTNode():
         self.value = value
         self.left = left
         self.right = right
+        global UID
+        self.ID = str(UID)
+        UID += 1
 
     # Printing helper
     def __str__(self):
         res = ""
         # Print ourselves
-        res += self.value
+        res += "ID: " + self.ID + "\n"
+        res += " " + self.value
         if len(self.value) == 0 or self.value[-1] != "\n":
             res += "\n"
 
         if self.left != None:
-            res += str(self.left)
+            res += "LEFT : " + str(self.left)
         else:
             res += "No Left\n"
 
         if self.right != None:
-            res += str(self.right)
+            res += "RIGHT: " + str(self.right)
         else:
             res += "No Right\n"
         

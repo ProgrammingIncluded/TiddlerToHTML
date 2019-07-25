@@ -55,10 +55,10 @@ def html_output_rules_post(node):
         return "</i>"
 
     elif node.type[0] == "U":
-        return "</u>\n"
+        return "</u>"
 
     elif node.type[0] == "B":
-        return "</b>\n"
+        return "</b>"
 
     if node.type == "ROOT":
         return ""
