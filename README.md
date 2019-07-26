@@ -9,9 +9,14 @@ python tparse <foldername> <outputfolder>
 ```
 
 ## Remarks
-Currently the project does not have very thorough parsing.
+Currently the project does not have very thorough error
+message or prevention. Works well if you verify .tid thru
+tiddly wiki interface first.
+
 The project was designed for easy, quick, and dirty solution
 for an internal project. Mass majority .tid files are markdown.
+So you can use pre-existing markdown converters if you require
+a more thorough and error proof solution.
 
 The metadata on each .tid file is appended at the beginning
 of each HTML file. You can use it to parse metadata or

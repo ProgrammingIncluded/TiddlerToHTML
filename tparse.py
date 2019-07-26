@@ -5,6 +5,10 @@ from tiddler_tree_rules import *
 from html_output_rules import *
 from BSTNode import BSTNode
 
+# Replace this with your output extension if 
+# you would like html but not html ext like .erb
+OUT_EXT = ".html"
+
 # Function to output help string.
 def help_str():
     s = "Please supply a path to a folder with tiddler files.\n"
@@ -25,7 +29,7 @@ def create_file_name(og):
     # Lowercase
     res = res.lower()
 
-    return res + ".html"
+    return res + OUT_EXT
 
 # Create the parse tree for the tiddler
 def tid_tree(filename):

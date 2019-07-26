@@ -4,8 +4,12 @@ from BSTNode import *
 # Global variables to keep track
 TOKENS = {"//" : "I", "__" : "U", "''": "B"}
 INQUOTE = False
-INNUMLIST = False
-INBULLIST = False
+
+# Numbers to denote how far into the list
+# List like TOKENS
+D_TOKENS = {"*": "LU", "#":"LO"}
+# Negative means no list
+INLIST = {k:-1 for k in D_TOKENS.keys()}
 
 
 # Append more data to the RAW node
@@ -104,11 +108,58 @@ def parse_raw(raw, line):
         raw = raw.left
     return raw
 
+# Function to help parse bullet point like syntax
+def parse_bull(tid, parent, line_mod, new_indent, cur_indent):
+
+    # Check if we changed heights
+    diff = new_indent - cur_indent
+
+    # Move our node accordingly
+    if diff > 0:
+        # Keep adding layers until we arrive
+        # at the right level
+        while diff != 0:
+            parent.left = BSTNode(parent, tid, "", None, None)
+            parent = parent.left
+            diff -= 1
+        parent.right = BSTNode(parent, "LI", "", None, None)
+        parent = parent.right
+        parent.right = BSTNode(parent, "RAW", line_mod, None, None)
+        return parent, new_indent
+    elif diff < 0:
+        # Keeping going up layers until we leave. 
+        while diff != 0:
+            parent = exit_scope(parent, tid)
+            diff -= 1
+
+    # Append our li value
+    parent.left = BSTNode(parent, "LI", "", None, None)
+    parent = parent.left
+    parent.right = BSTNode(parent, "RAW", line_mod, None, None)
+    return parent, new_indent
+
+
 # Helper function in order to parse each line as a tree node value
 # Returns left most node
 def tiddler_tree_rules(parent, line):
     
     global INQUOTE
+    global INLIST
+
+    # Get a copy of list indentation
+    # Clip to 0
+    cur_indent = {k:max(v, 0) for k, v in INLIST.items()}
+
+    # Check if we have to reset the bullet list
+    for k, v in INLIST.items():
+        if v == 0:
+            # Move out of the unlist
+            parent = exit_scope(parent, D_TOKENS[k])
+            INLIST[k] = -1
+        elif v > 0:
+            # Set it to 0 unless we see another list
+            INLIST[k] = 0
+
     values = line.split(' ', 1)
 
     # Count number of header values for headers
@@ -124,6 +175,16 @@ def tiddler_tree_rules(parent, line):
             parent.left =  BSTNode(parent, "H" + str(num), "H" + str(num), None, None)
             parent.left.right = BSTNode(parent.left, "RAW", line_mod, None, None)
             return parent.left
+
+        # Parse list related functions
+        # Can only have one list, no recursive lists.
+        for k, v in D_TOKENS.items():
+            if token[0] == k:
+                # Count number of stars
+                num = count_front_symbol(token, k)
+                parent, INLIST[k] = parse_bull(v, parent, line_mod, num, cur_indent[k])
+                return parent
+
 
     # Parse quotes
     if line[0:3] == "<<<":
