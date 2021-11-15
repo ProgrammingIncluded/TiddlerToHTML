@@ -1,3 +1,8 @@
+# DEPRECATED PROJECT
+
+This project has now been deprecated in favor of actual `export Tiddler` > `static HTML` functionality.
+The scripts have been outdated and has been a while since I last used them, please use with caution.
+
 # Tiddler to HTML
 Python to converts eachtiddler files (.tid) in a folder into
 the corresponding HTML file in another folder.
